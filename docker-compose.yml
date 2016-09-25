@@ -1,0 +1,27 @@
+nginx_proxy:
+  image: jwilder/nginx-proxy
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ./volumes/certs/:/etc/nginx/certs # Certs for all Required Domains must be in this Directory
+    - /var/run/docker.sock:/tmp/docker.sock:ro
+
+db:
+  image: postgres
+  environment:
+    - POSTGRES_PASSWORD=password
+  volumes:
+    - ./volumes/oc-db:/var/lib/postgresql/data
+
+owncloud:
+  image: owncloud:9.1.1-apache
+  hostname: owncloud.ii.org.nz
+  environment:
+    - VIRTUAL_HOST=oc.ii.org.nz
+  links:
+    - db:postgres
+  volumes:
+    - ./volumes/ocApps:/var/www/html/apps
+    - ./volumes/ocConfig:/var/www/html/config
+    - ./volumes/ocData:/var/www/html/data
